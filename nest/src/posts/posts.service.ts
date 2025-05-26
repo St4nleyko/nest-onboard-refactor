@@ -4,32 +4,33 @@ import { Model } from 'mongoose';
 import { Post } from './schemas/post.schema';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import {PostsRepository} from "./posts.repository";
 
+//handles logic/validations
 @Injectable()
 export class PostsService {
-  constructor(
-      @InjectModel(Post.name) private postModel: Model<Post>,
-  ) {}
+  constructor(private readonly repo: PostsRepository) {}
 
-  async findAll(): Promise<Post[]> {
-    return this.postModel.find().exec();
+  async findAll() {
+    return this.repo.findAll();
   }
 
-  async findOne(id: string): Promise<Post | null> {
-    return this.postModel.findById(id).exec();
+  async findOne(id: string){
+    return this.repo.findById(id);
   }
 
-  async create(data: CreatePostDto): Promise<Post> {
-    const newPost = new this.postModel(data);
-    return newPost.save();
+
+  async create(data: CreatePostDto) {
+    return this.repo.post(data);
   }
 
-  async update(id: string, data: UpdatePostDto): Promise<Post | null> {
-    return this.postModel.findByIdAndUpdate(id, data, { new: true }).exec();
+
+  async update(id: string, data: UpdatePostDto) {
+    return this.repo.update(id, data);
   }
 
-  async remove(id: string): Promise<boolean> {
-    const res = await this.postModel.deleteOne({ _id: id }).exec();
-    return res.deletedCount > 0;
+
+  async remove(id: string) {
+    return this.repo.destroy(id);
   }
 }
