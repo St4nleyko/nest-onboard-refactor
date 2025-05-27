@@ -2,10 +2,12 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PostsService } from '../api';
 import { Create_Post_Schema_Requirements } from '../api';
+import {usePostStore} from "../stores/usePostStore";
 
 function PostForm() {
     const navigate = useNavigate();
     type PostType = Create_Post_Schema_Requirements['type'];
+    const { addPost } = usePostStore();
 
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
@@ -14,7 +16,7 @@ function PostForm() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            await PostsService.postsControllerStore({ title, content, type });
+            await addPost({ title, content, type });
             navigate('/');
         } catch (err) {
             console.error('Failed to create post:', err);

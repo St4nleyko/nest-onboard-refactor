@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {Create_Post_Schema_Requirements, PostsService} from '../api';
+import {usePostStore} from "../stores/usePostStore";
 
 function PostEdit() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+    const { updatePost, fetchPost, selectedPost } = usePostStore();
 
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
@@ -12,25 +14,25 @@ function PostEdit() {
     type PostType = Create_Post_Schema_Requirements['type'];
 
     const [type, setType] = useState<PostType>('Article' as PostType);
-
+    //fetch the data
     useEffect(() => {
         if (id) {
-            PostsService.postsControllerShow(id)
-                .then(post => {
-                    setTitle(post.title);
-                    setContent(post.content ?? '');
-                    setType(post.type);
-                })
-                .catch(err => {
-                    console.error('Post not found:', err);
-                });
+            fetchPost(id);
         }
     }, [id]);
-
+    //load the data into fields
+    useEffect(() => {
+        if (selectedPost) {
+            setTitle(selectedPost.title);
+            setContent(selectedPost.content ?? '');
+            setType(selectedPost.type);
+        }
+    }, [selectedPost]);
+    //post the data
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            await PostsService.postsControllerUpdate(id!, { title, content, type });
+            await updatePost(id!, { title, content, type });
             navigate('/');
         } catch (err) {
             console.error('Update failed:', err);

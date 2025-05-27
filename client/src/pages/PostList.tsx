@@ -1,20 +1,17 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { PostsService, PostResponse } from '../api';
+import {usePostStore} from "../stores/usePostStore";
 
 function PostList() {
-    const [posts, setPosts] = useState<PostResponse[]>([]);
+    const { posts, fetchPosts, deletePost } = usePostStore();
     const navigate = useNavigate();
-
     useEffect(() => {
-        PostsService.postsControllerIndex().then(data => {
-            console.log('API Response:', data);
-            setPosts(data);
-        });    }, []);
+        fetchPosts();
+    }, []);
 
     const handleDelete = async (id: string) => {
-        await PostsService.postsControllerDestroy(id);
-        setPosts(posts.filter(p => p._id !== id));
+        await deletePost(id);
     };
 
     return (
