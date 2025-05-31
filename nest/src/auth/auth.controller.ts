@@ -1,7 +1,7 @@
 import { Controller, Post, UseGuards, Request } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
-import { ApiTags, ApiBody, ApiOperation } from '@nestjs/swagger';
+import {ApiTags, ApiBody, ApiOperation, ApiOkResponse} from '@nestjs/swagger';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -15,6 +15,15 @@ export class AuthController {
             properties: {
                 email: { type: 'string', example: 'user@example.com' },
                 password: { type: 'string', example: 'password123' },
+            },
+            required: ['email', 'password'],
+        },
+    })
+    @ApiOkResponse({
+        description: 'JWT access token generovany',
+        schema: {
+            example: {
+                access_token: 'eyJhbGciOi...etc',
             },
         },
     })
