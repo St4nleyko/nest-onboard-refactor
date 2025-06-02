@@ -5,7 +5,6 @@ import PostEdit from "./pages/PostEdit";
 import LoginPage from "./pages/auth/LoginPage";
 import AuthGuard from   "./components/AuthGuard"
 import RegisterPage from "./pages/auth/RegisterPage";
-import "./api/utils/axios";
 
 
 
