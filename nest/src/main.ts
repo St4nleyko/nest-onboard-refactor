@@ -26,6 +26,15 @@ async function bootstrap() {
       .setDescription('Post swagger')
       .setVersion('1.0')
       .addTag('Posts')
+      .addBearerAuth(
+          {
+              type: 'http',
+              scheme: 'bearer',
+              bearerFormat: 'JWT',
+              description: 'Enter your JWT token in the format: Bearer <token>',
+          },
+          'access-token',
+      )
       .build();
   const documentFactory = () => SwaggerModule.createDocument(app, configDoc);
   SwaggerModule.setup('api', app, documentFactory);
