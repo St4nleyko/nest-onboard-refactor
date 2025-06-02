@@ -5,30 +5,8 @@ import PostEdit from "./pages/PostEdit";
 import LoginPage from "./pages/auth/LoginPage";
 import AuthGuard from   "./components/AuthGuard"
 import RegisterPage from "./pages/auth/RegisterPage";
+import {MainLayout} from "./layouts/MainLayout";
 
-
-
-
-function LogoutLayer() {
-    const navigate = useNavigate();
-    const token = localStorage.getItem('token');
-
-    const handleLogout = () => {
-        localStorage.removeItem('token');
-        navigate('/login');
-    };
-
-    return (
-        <>
-            {token && (
-                <div style={{ padding: '10px', borderBottom: '1px solid #ccc' }}>
-                    <button onClick={handleLogout}>Logout</button>
-                </div>
-            )}
-            <Outlet />
-        </>
-    );
-}
 function App() {
     return (
 
@@ -38,7 +16,7 @@ function App() {
                 <Route path="/register" element={<RegisterPage />} />
 
                 <Route element={<AuthGuard />}>
-                    <Route element={<LogoutLayer/>}>
+                    <Route element={<MainLayout />}>
 
                         <Route path="/" element={<PostList />} />
                         <Route path="/create" element={<PostForm />} />
