@@ -1,21 +1,20 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuthStore, api } from '../stores/AuthStore';
+import { useAuthStore } from '../stores/AuthStore';
 
 export function LoginPage() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const setToken = useAuthStore((s) => s.setToken);
+    const login = useAuthStore((s) => s.login);
     const navigate = useNavigate();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const res = await api.auth.authControllerLogin({ email, password });
-            setToken(res.data.access_token);
+            await login({ email, password });
             navigate('/');
         } catch (error) {
-            alert('Login failed');
+            console.log('Login failed');
         }
     };
 

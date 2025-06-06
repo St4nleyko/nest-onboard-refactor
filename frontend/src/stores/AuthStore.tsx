@@ -1,41 +1,68 @@
 import { create } from 'zustand';
 import { Api } from '../../Api';
 
-const token = localStorage.getItem('token');
-
-// 🔹 Single global instance of API
 export const api = new Api({
-    baseUrl: import.meta.env.VITE_API_URL || 'http://localhost:8000',
+    baseUrl: 'http://localhost:8000',
     baseApiParams: {
-        secure: true,
+        credentials: 'include',
     },
-    securityWorker: (token) =>
-        token ? { headers: { Authorization: `Bearer ${token}` } } : {},
 });
 
-api.setSecurityData(token);
-
 interface AuthState {
-    token: string | null;
-    setToken: (token: string) => void;
-    clearToken: () => void;
-    isAuthenticated: () => boolean;
+    login: (credentials: { email: string; password: string }) => Promise<void>;
+    logout: () => Promise<void>;
+    isAuthenticated: boolean;
+    loading: boolean;
+    checkSession: () => Promise<void>;
 }
 
-export const useAuthStore = create<AuthState>((set, get) => ({
-    token,
+export const useAuthStore = create<AuthState>((set) => ({
+    isAuthenticated: false,
+    loading: true,
 
-    setToken: (token) => {
-        localStorage.setItem('token', token);
-        api.setSecurityData(token);
-        set({ token });
+    login: async (credentials) => {
+        const { csrfToken } = await api.auth.authControllerGetCsrfToken().then(r => r.data);
+        await api.auth.authControllerLogin(credentials, {
+            headers: { 'X-CSRF-Token': csrfToken }
+        });
+
+        set({ isAuthenticated: true });
     },
 
-    clearToken: () => {
-        localStorage.removeItem('token');
-        api.setSecurityData(null);
-        set({ token: null });
+
+    logout: async () => {
+        const { csrfToken } = await api.auth.authControllerGetCsrfToken().then(r => r.data);
+
+        await api.auth.authControllerLogout({
+            credentials: 'include',
+            headers: {
+                'X-CSRF-Token': csrfToken,
+            },
+        });
+        set({ isAuthenticated: false });
     },
 
-    isAuthenticated: () => !!get().token,
+    checkSession: async () => {
+        set({ loading: true });
+        try {
+            const {
+                data: { csrfToken },
+            } = await api.auth.authControllerGetCsrfToken();
+            set({ csrfToken });
+
+            const response  = await api.auth.authControllerMe();
+            const user = await response.json(); // ✅ THIS is what you're missing
+
+            console.log('[checkSession] User is authenticated:', user);
+
+            set({ isAuthenticated: true });
+        } catch (err) {
+            console.warn('[checkSession] failed:', err);
+            set({ isAuthenticated: false });
+        } finally {
+            set({ loading: false });
+        }
+    },
+
+
 }));

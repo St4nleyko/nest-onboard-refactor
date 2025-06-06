@@ -12,7 +12,7 @@
 
 export interface PostResponse {
   /** @example "abc123" */
-  id: string;
+  _id: string;
   /** @example "My first post" */
   title: string;
   /** @example "This is the content of the post." */
@@ -373,7 +373,7 @@ export class Api<
         path: `/posts`,
         method: "POST",
         body: data,
-        secure: true,
+        secure: false,
         type: ContentType.Json,
         format: "json",
         ...params,
@@ -392,7 +392,7 @@ export class Api<
       this.request<PostResponse, void>({
         path: `/posts/${id}`,
         method: "GET",
-        secure: true,
+        secure: false,
         format: "json",
         ...params,
       }),
@@ -415,7 +415,7 @@ export class Api<
         path: `/posts/${id}`,
         method: "PUT",
         body: data,
-        secure: true,
+        secure: false,
         type: ContentType.Json,
         format: "json",
         ...params,
@@ -434,7 +434,7 @@ export class Api<
       this.request<void, void>({
         path: `/posts/${id}`,
         method: "DELETE",
-        secure: true,
+        secure: false,
         ...params,
       }),
   };
@@ -462,6 +462,55 @@ export class Api<
         body: data,
         type: ContentType.Json,
         format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Auth
+     * @name AuthControllerLogout
+     * @summary Logout user by clearing cookisz
+     * @request POST:/auth/logout
+     */
+    authControllerLogout: (params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/auth/logout`,
+        method: "POST",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Auth
+     * @name AuthControllerGetCsrfToken
+     * @summary Get CSRF token for protected requests
+     * @request GET:/auth/csrf-token
+     */
+    authControllerGetCsrfToken: (params: RequestParams = {}) =>
+      this.request<any, any>({
+        path: `/auth/csrf-token`,
+        method: "GET",
+        format: "json",
+        ...params,
+      }),
+
+    /**
+     * No description
+     *
+     * @tags Auth
+     * @name AuthControllerMe
+     * @summary get user to keep the session
+     * @request GET:/auth/me
+     * @secure
+     */
+    authControllerMe: (params: RequestParams = {}) =>
+        this.request<{ email: string; userId: string }, any>({
+        path: `/auth/me`,
+        method: "GET",
+        secure: false,
         ...params,
       }),
   };

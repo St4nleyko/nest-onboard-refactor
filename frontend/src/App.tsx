@@ -4,8 +4,19 @@ import AuthGuard from "./components/AuthGuard";
 import {LoginPage} from "./pages/LoginPage";
 import PostForm from "./pages/posts/PostForm";
 import PostEdit from "./pages/posts/PostEdit";
+import {useEffect} from "react";
+import {useAuthStore} from "./stores/AuthStore";
 
 function App() {
+
+    const checkSession = useAuthStore((s) => s.checkSession);
+    const loading = useAuthStore((s) => s.loading);
+
+    useEffect(() => {
+        checkSession();
+    }, []);
+
+    if (loading) return <div>Loading session...</div>;
     return (
         <BrowserRouter>
             <Routes>

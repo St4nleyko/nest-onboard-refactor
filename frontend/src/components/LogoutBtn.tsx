@@ -1,14 +1,16 @@
-import {useAuthStore} from "../stores/AuthStore";
-import {useNavigate} from "react-router-dom";
+import { useAuthStore } from "../stores/AuthStore";
+import { useNavigate } from "react-router-dom";
 
 export function LogoutButton() {
     const navigate = useNavigate();
 
-    const clearToken = useAuthStore((s) => s.clearToken);
-    const handleLogout = () => {
-        clearToken();
+    const logout = useAuthStore((s) => s.logout);
+
+    const handleLogout = async () => {
+        await logout();
         navigate('/login');
     };
+
     return (
         <button onClick={handleLogout}>
             Logout

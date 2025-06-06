@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { api } from '../../stores/AuthStore';
+import {api, useAuthStore} from '../../stores/AuthStore';
 import type { CreatePostSchemaRequirements } from '../../../Api';
 
 function PostForm() {
@@ -16,8 +16,15 @@ function PostForm() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        const csrfToken = useAuthStore.getState().csrfToken;
+
         try {
-            await api.posts.postsControllerStore({ title, content, type }, {secure:true}); // ✅ direct API call
+            await api.posts.postsControllerStore({ title, content, type },
+                {
+                credentials: 'include',
+                headers: {
+                    'X-CSRF-Token': csrfToken,
+                }});
             navigate('/');
         } catch (err) {
             console.error('Failed to create post:', err);

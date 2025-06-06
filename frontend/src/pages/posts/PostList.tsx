@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { api } from '../../stores/AuthStore';
+import {api, useAuthStore} from '../../stores/AuthStore';
 import type { PostResponse } from '../../../Api';
 import {LogoutButton} from "../../components/LogoutBtn";
 
@@ -12,7 +12,6 @@ function PostList() {
         const fetchPosts = async () => {
             try {
                 const res = await api.posts.postsControllerIndex();
-                console.log(res)
                 setPosts(res.data);
             } catch (err) {
                 console.error('Failed to fetch posts:', err);
@@ -23,8 +22,17 @@ function PostList() {
 
     const handleDelete = async (id: string) => {
         try {
-            await api.posts.postsControllerDestroy(id);
-            setPosts((prev) => prev.filter((p) => p.id !== id));
+            const csrfToken = useAuthStore.getState().csrfToken;
+            console.log(csrfToken)
+            await api.posts.postsControllerDestroy(id, {
+                credentials: 'include',
+                headers: {
+                    'X-CSRF-Token': csrfToken,
+                },
+            });
+
+            setPosts((prev) => prev.filter((p) => p._id !== id));
+            navigate('/')
         } catch (err) {
             console.error('Failed to delete post:', err);
         }

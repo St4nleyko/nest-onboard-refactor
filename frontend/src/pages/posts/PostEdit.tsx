@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { api } from '../../stores/AuthStore';
+import {api, useAuthStore} from '../../stores/AuthStore';
 import type {
     CreatePostSchemaRequirements,
     PostResponse,
@@ -42,7 +42,14 @@ function PostEdit() {
         e.preventDefault();
         if (!id) return;
         try {
-            await api.posts.postsControllerUpdate(id, { title, content, type });
+            const csrfToken = useAuthStore.getState().csrfToken;
+
+            await api.posts.postsControllerUpdate(id, { title, content, type },{
+                credentials: 'include',
+                headers: {
+                    'X-CSRF-Token': csrfToken,
+                }
+            });
             navigate('/');
         } catch (err) {
             console.error('Update failed:', err);
