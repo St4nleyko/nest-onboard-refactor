@@ -15,51 +15,61 @@ interface AuthState {
     loading: boolean;
     checkSession: () => Promise<void>;
 }
+const getCsrfToken = async () => {
+    return await api.auth.authControllerGetCsrfToken().then(r => r.data);
+}
 
 export const useAuthStore = create<AuthState>((set) => ({
     isAuthenticated: false,
     loading: true,
 
     login: async (credentials) => {
-        const { csrfToken } = await api.auth.authControllerGetCsrfToken().then(r => r.data);
-        await api.auth.authControllerLogin(credentials, {
-            headers: { 'X-CSRF-Token': csrfToken }
-        });
-
-        set({ isAuthenticated: true });
+        try {
+            const {csrfToken} = await getCsrfToken();
+            await api.auth.authControllerLogin(credentials, {
+                headers: { 'X-CSRF-Token': csrfToken }
+            });
+            set({ loading: false, isAuthenticated: true });
+        } catch (error) {
+            console.error('[login] failed:', error);
+            set({ loading: false, isAuthenticated: false });
+            throw error;
+        }
     },
 
-
     logout: async () => {
-        const { csrfToken } = await api.auth.authControllerGetCsrfToken().then(r => r.data);
+        try {
+            const {csrfToken} = await getCsrfToken();
+            await api.auth.authControllerLogout({
+                headers: {
+                    'X-CSRF-Token': csrfToken,
+                },
+            });
+        } catch (error) {
+            console.error('[logout] failed:', error);
+        }
+        finally {
+            set({ isAuthenticated: false });
+        }
 
-        await api.auth.authControllerLogout({
-            credentials: 'include',
-            headers: {
-                'X-CSRF-Token': csrfToken,
-            },
-        });
-        set({ isAuthenticated: false });
     },
 
     checkSession: async () => {
-        set({ loading: true });
+        set({ isAuthenticated: false });
         try {
-            const {
-                data: { csrfToken },
-            } = await api.auth.authControllerGetCsrfToken();
+            const {csrfToken} = await getCsrfToken();
             set({ csrfToken });
-
             const response  = await api.auth.authControllerMe();
-            const user = await response.json(); // ✅ THIS is what you're missing
-
-            console.log('[checkSession] User is authenticated:', user);
-
+            const user = await response.json();
+            if (!user || !user.userId) {
+                throw new Error('Invalid user data received');
+            }
             set({ isAuthenticated: true });
-        } catch (err) {
+        }
+        catch (err) {
             console.warn('[checkSession] failed:', err);
-            set({ isAuthenticated: false });
-        } finally {
+        }
+        finally {
             set({ loading: false });
         }
     },

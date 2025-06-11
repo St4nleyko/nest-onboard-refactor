@@ -76,7 +76,6 @@ export class AuthController {
         },
     })
     getCsrfToken(@Req() req: Request) {
-        console.log((req as any).csrfToken())
         return { csrfToken: (req as any).csrfToken() };
     }
 
@@ -85,9 +84,6 @@ export class AuthController {
     @ApiOperation({ summary: 'get user to keep the session' })
     @Get('me')
     me(@Req() req) {
-        console.log('keeping session:')
-        console.log(req.user)
-
         return {
             email: req.user.email,
             userId: req.user.userId,

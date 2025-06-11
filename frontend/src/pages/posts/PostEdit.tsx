@@ -45,7 +45,6 @@ function PostEdit() {
             const csrfToken = useAuthStore.getState().csrfToken;
 
             await api.posts.postsControllerUpdate(id, { title, content, type },{
-                credentials: 'include',
                 headers: {
                     'X-CSRF-Token': csrfToken,
                 }

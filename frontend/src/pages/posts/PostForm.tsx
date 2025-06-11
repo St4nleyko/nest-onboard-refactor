@@ -17,11 +17,9 @@ function PostForm() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const csrfToken = useAuthStore.getState().csrfToken;
-
         try {
             await api.posts.postsControllerStore({ title, content, type },
                 {
-                credentials: 'include',
                 headers: {
                     'X-CSRF-Token': csrfToken,
                 }});

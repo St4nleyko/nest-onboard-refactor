@@ -22,8 +22,10 @@ function PostList() {
 
     const handleDelete = async (id: string) => {
         try {
+            if (!confirm('Isto vymazať?')) {
+                return;
+            }
             const csrfToken = useAuthStore.getState().csrfToken;
-            console.log(csrfToken)
             await api.posts.postsControllerDestroy(id, {
                 credentials: 'include',
                 headers: {
